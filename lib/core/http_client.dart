@@ -7,8 +7,8 @@ import 'package:gestor_cafeteria/core/failure.dart';
 import 'package:http/http.dart' as http;
 
 class ApiClient {
-  final http.Client? _client;
-  final Uri? baseUrl;
+  final http.Client _client;
+  final Uri baseUrl;
   final Duration timeout;
 
   ApiClient({
@@ -28,12 +28,10 @@ class ApiClient {
   Future<dynamic> get(String path) => _send('GET', path);
   Future<dynamic> post(String path, Object body) => _send('POST', path, body);
   Future<dynamic> patch(String path, Object body) => _send('PATCH', path, body);
-  Future<dynamic> update(String path, Object body) =>
-      _send('UPDATE', path, body);
   Future<void> delete(String path) => _send('DELETE', path);
 
   Future<dynamic> _send(String method, String path, [Object? body]) async {
-    final request = http.Request(method, baseUrl!.resolve(path))
+    final request = http.Request(method, baseUrl.resolve(path))
       ..headers['Accept'] = 'application/json';
 
     if (body != null) {
@@ -44,7 +42,7 @@ class ApiClient {
     final http.Response response;
 
     try {
-      response = await _client!
+      response = await _client
           .send(request)
           .then(http.Response.fromStream)
           .timeout(timeout);
@@ -57,7 +55,7 @@ class ApiClient {
     final json = _tryDecode(response);
     final code = response.statusCode;
 
-    if (code >= 200 && code <= 300) return json;
+    if (code >= 200 && code < 300) return json;
 
     final detail = _extractDetail(json) ?? 'Error HTTP $code';
 
